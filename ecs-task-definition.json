@@ -1,0 +1,54 @@
+{
+    "family": "school-backend-task",
+    "networkMode": "awsvpc",
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "512",
+    "memory": "1024",
+    "executionRoleArn": "arn:aws:iam::248830756685:role/ecsTaskExecutionRole",
+    "taskRoleArn": "arn:aws:iam::248830756685:role/ecsTaskRole",
+    "containerDefinitions": [
+        {
+            "name": "school-backend",
+            "image": "248830756685.dkr.ecr.us-east-1.amazonaws.com/school-backend:latest",
+            "essential": true,
+            "portMappings": [
+                {
+                    "containerPort": 3000,
+                    "hostPort": 3000,
+                    "protocol": "tcp"
+                }
+            ],
+            "environment": [
+                {"name": "NODE_ENV", "value": "production"},
+                {"name": "PORT", "value": "3000"},
+                {"name": "DB_HOST", "value": "master-sql.cc1zpwoqvmxn.us-east-1.rds.amazonaws.com"},
+                {"name": "DB_PORT", "value": "3306"},
+                {"name": "DB_USERNAME", "value": "master"},
+                {"name": "DB_PASSWORD", "value": "UdTbIgzmIzU4O6LoqTvB"},
+                {"name": "DB_DATABASE", "value": "sigalame"},
+                {"name": "JWT_SECRET", "value": "b944661d-c765-4911-919f-e109778c050c"},
+                {"name": "JWT_EXPIRES_IN", "value": "24h"},
+                {"name": "AT_USERNAME", "value": "basilndonga"},
+                {"name": "AT_API_KEY", "value": "6fa096242bba3e97dd55e88929f4ed5b5557f01df1f8d1900d359735d00b1534"},
+                {"name": "AT_ENVIRONMENT", "value": "production"},
+                {"name": "USSD_SESSION_TIMEOUT", "value": "300000"},
+                {"name": "USSD_MAX_CONCURRENT_SESSIONS", "value": "1000"}
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/school-backend",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "healthCheck": {
+                "command": ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1"],
+                "interval": 30,
+                "timeout": 5,
+                "retries": 3,
+                "startPeriod": 60
+            }
+        }
+    ]
+}
