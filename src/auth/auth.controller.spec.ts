@@ -46,12 +46,15 @@ describe('AuthController', () => {
       const result = await controller.login(loginDto);
 
       expect(result).toEqual(mockResponse);
-      expect(mockAuthService.login).toHaveBeenCalledWith('+254712345678');
+      expect(mockAuthService.login).toHaveBeenCalledWith(
+        '+254712345678',
+        undefined,
+      );
     });
   });
 
   describe('verify', () => {
-    it('should return valid token response', async () => {
+    it('should return valid token response', () => {
       const mockRequest = {
         user: {
           phoneNumber: '+254712345678',
@@ -60,7 +63,7 @@ describe('AuthController', () => {
         },
       };
 
-      const result = await controller.verify(mockRequest);
+      const result = controller.verify(mockRequest);
 
       expect(result).toEqual({
         valid: true,

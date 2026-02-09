@@ -49,31 +49,68 @@ export class EventService {
         }));
       }
     } catch (error) {
-      console.log('Database error:', error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.log('Database error:', errorMessage);
     }
 
-    // Demo data fallback
+    // Demo data fallback with specific school events
     const demoData = [
       {
-        eventName: 'CAT 1 Exams',
-        eventDetails: 'Beginning of CAT 1 Exams',
-        startDate: new Date('2026-04-12'),
-        endDate: new Date('2026-04-12'),
-        schoolName: 'Sigalame Boys',
+        eventName: 'Form Four Academic day',
+        eventDetails: 'Academic day for Form Four students',
+        startDate: new Date('2026-03-01'),
+        endDate: new Date('2026-03-01'),
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
-        eventName: 'Opening Date',
-        eventDetails: 'Students to resume learning',
-        startDate: new Date('2026-04-12'),
-        endDate: new Date('2026-04-12'),
-        schoolName: 'Sigalame Boys',
+        eventName: 'Form Three Academic day',
+        eventDetails: 'Academic day for Form Three students',
+        startDate: new Date('2026-03-08'),
+        endDate: new Date('2026-03-08'),
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
-        eventName: 'End year Exams',
-        eventDetails: 'Beginning of End Term exams F1-F3',
-        startDate: new Date('2026-04-12'),
-        endDate: new Date('2026-04-12'),
-        schoolName: 'Sigalame Boys',
+        eventName: "Grade Ten parents' orientation",
+        eventDetails: 'Orientation session for Grade Ten parents',
+        startDate: new Date('2026-03-15'),
+        endDate: new Date('2026-03-15'),
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+      },
+      {
+        eventName: 'Sending learners home to collect fees',
+        eventDetails: 'Students will be sent home to collect outstanding fees',
+        startDate: new Date('2026-03-16'),
+        endDate: new Date('2026-03-16'),
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+      },
+      {
+        eventName: 'Beginning of End of Term I exams',
+        eventDetails: 'Start of End of Term I examinations',
+        startDate: new Date('2026-03-18'),
+        endDate: new Date('2026-03-18'),
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+      },
+      {
+        eventName: 'Annual key closure of Term one I',
+        eventDetails: 'Official closure of Term One',
+        startDate: new Date('2026-04-14'),
+        endDate: new Date('2026-04-14'),
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+      },
+      {
+        eventName: 'Opening of Term Two II',
+        eventDetails: 'Students to resume for Term Two',
+        startDate: new Date('2026-04-28'),
+        endDate: new Date('2026-04-28'),
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+      },
+      {
+        eventName: 'Annual general meeting',
+        eventDetails: 'Annual general meeting for parents and stakeholders',
+        startDate: new Date('2026-05-21'),
+        endDate: new Date('2026-05-21'),
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
     ];
 
@@ -84,6 +121,7 @@ export class EventService {
       '+254715648891',
       '+254714732457',
       '+254123456789',
+      '+254748944951', // Admin phone
     ];
     if (demoPhones.includes(phoneNumber)) {
       return demoData;

@@ -11,11 +11,15 @@ export interface ExamResultDto {
   class: string;
   datePosted: Date;
   formattedResults: SubjectResult[];
+  meanGrade?: string;
+  overallPosition?: string;
+  totalStudents?: number;
 }
 
 export interface SubjectResult {
   subject: string;
   score: number;
+  grade: string;
 }
 
 @Injectable()
@@ -43,32 +47,40 @@ export class ExamService {
         }));
       }
     } catch (error) {
-      console.log('Database error:', error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.log('Database error:', errorMessage);
     }
 
-    // Demo data fallback
+    // Demo data fallback with grades and positioning
     const demoData = [
       {
-        adm: '3262',
+        adm: '58641',
         studentName: 'MARTIN WAMALWA',
-        examName: 'CAT1',
-        results: 'ENG:45KIS:66MAT:76BIO:23PHY:66CHEM:76CRE:78AGR:66ENTRY:8',
-        class: 'FORM1',
-        datePosted: new Date('2019-02-24'),
+        examName: 'End of Term 1 Exams',
+        results: 'ENG:78KIS:72MAT:85BIO:68PHY:82CHEM:79CRE:75AGR:71',
+        class: 'FORM 2',
+        datePosted: new Date('2026-01-15'),
         formattedResults: this.parseResultString(
-          'ENG:45KIS:66MAT:76BIO:23PHY:66CHEM:76CRE:78AGR:66ENTRY:8',
+          'ENG:78KIS:72MAT:85BIO:68PHY:82CHEM:79CRE:75AGR:71',
         ),
+        meanGrade: 'B+',
+        overallPosition: '3',
+        totalStudents: 49,
       },
       {
-        adm: '3270',
+        adm: '58642',
         studentName: 'KEVIN OMONDI',
-        examName: 'CAT1',
-        results: 'ENG:70KIS:87MAT:76BIO:70PHY:87CHEM:76GEO:56COMP:76ENTRY:8',
-        class: 'FORM1',
-        datePosted: new Date('2019-02-24'),
+        examName: 'End of Term 1 Exams',
+        results: 'ENG:82KIS:79MAT:88BIO:85PHY:90CHEM:87GEO:76COMP:84',
+        class: 'FORM 3',
+        datePosted: new Date('2026-01-15'),
         formattedResults: this.parseResultString(
-          'ENG:70KIS:87MAT:76BIO:70PHY:87CHEM:76GEO:56COMP:76ENTRY:8',
+          'ENG:82KIS:79MAT:88BIO:85PHY:90CHEM:87GEO:76COMP:84',
         ),
+        meanGrade: 'A-',
+        overallPosition: '2',
+        totalStudents: 52,
       },
     ];
 
@@ -79,6 +91,7 @@ export class ExamService {
       '+254715648891',
       '+254714732457',
       '+254123456789',
+      '+254748944951', // Admin phone
     ];
     if (demoPhones.includes(phoneNumber)) {
       return demoData;
@@ -91,16 +104,39 @@ export class ExamService {
     // Parse format like "ENG:45KIS:66MAT:76BIO:23PHY:66CHEM:76CRE:78AGR:66ENTRY:8"
     const subjects: SubjectResult[] = [];
     const regex = /([A-Z]+):(\d+)/g;
-    let match;
+    let match: RegExpExecArray | null;
 
     while ((match = regex.exec(resultString)) !== null) {
-      subjects.push({
-        subject: match[1],
-        score: parseInt(match[2]),
-      });
+      const scoreStr = match[2];
+      if (scoreStr) {
+        const score = parseInt(scoreStr, 10);
+        const subjectName = match[1];
+        if (subjectName) {
+          subjects.push({
+            subject: subjectName,
+            score: score,
+            grade: this.calculateGrade(score),
+          });
+        }
+      }
     }
 
     return subjects;
+  }
+
+  calculateGrade(score: number): string {
+    if (score >= 80) return 'A';
+    if (score >= 75) return 'A-';
+    if (score >= 70) return 'B+';
+    if (score >= 65) return 'B';
+    if (score >= 60) return 'B-';
+    if (score >= 55) return 'C+';
+    if (score >= 50) return 'C';
+    if (score >= 45) return 'C-';
+    if (score >= 40) return 'D+';
+    if (score >= 35) return 'D';
+    if (score >= 30) return 'D-';
+    return 'E';
   }
 
   formatResultsForUssd(results: ExamResultDto[]): string {

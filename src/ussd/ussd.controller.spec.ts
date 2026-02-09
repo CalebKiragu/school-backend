@@ -30,7 +30,7 @@ describe('UssdController', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('handleUssdRequest', () => {
+  describe('handleUssdWebhook', () => {
     it('should handle USSD request with form-encoded content type', async () => {
       const mockRequest = {
         sessionId: 'test-session',
@@ -43,9 +43,32 @@ describe('UssdController', () => {
         'CON Welcome to Test School',
       );
 
-      const result = await controller.handleUssdRequest(
+      const result = await controller.handleUssdWebhook(
         mockRequest,
         'application/x-www-form-urlencoded',
+      );
+
+      expect(result).toBe('CON Welcome to Test School');
+      expect(mockUssdService.handleUssdRequest).toHaveBeenCalledWith(
+        mockRequest,
+      );
+    });
+
+    it('should handle USSD request with JSON content type', async () => {
+      const mockRequest = {
+        sessionId: 'test-session',
+        serviceCode: '*123#',
+        phoneNumber: '+254712345678',
+        text: '1',
+      };
+
+      mockUssdService.handleUssdRequest.mockResolvedValue(
+        'CON Welcome to Test School',
+      );
+
+      const result = await controller.handleUssdWebhook(
+        mockRequest,
+        'application/json',
       );
 
       expect(result).toBe('CON Welcome to Test School');
@@ -62,9 +85,9 @@ describe('UssdController', () => {
         text: '1',
       };
 
-      const result = await controller.handleUssdRequest(
+      const result = await controller.handleUssdWebhook(
         mockRequest,
-        'application/json',
+        'text/plain',
       );
 
       expect(result).toBe('END Invalid request format');
@@ -79,13 +102,35 @@ describe('UssdController', () => {
         text: '1',
       };
 
-      const result = await controller.handleUssdRequest(
+      const result = await controller.handleUssdWebhook(
         mockRequest,
-        undefined as any,
+        undefined as string,
       );
 
       expect(result).toBe('END Invalid request format');
       expect(mockUssdService.handleUssdRequest).not.toHaveBeenCalled();
+    });
+
+    it('should handle service errors gracefully', async () => {
+      const mockRequest = {
+        sessionId: 'test-session',
+        serviceCode: '*123#',
+        phoneNumber: '+254712345678',
+        text: '1',
+      };
+
+      mockUssdService.handleUssdRequest.mockRejectedValue(
+        new Error('Service error'),
+      );
+
+      const result = await controller.handleUssdWebhook(
+        mockRequest,
+        'application/x-www-form-urlencoded',
+      );
+
+      expect(result).toBe(
+        'END Service temporarily unavailable. Please try again later.',
+      );
     });
   });
 });

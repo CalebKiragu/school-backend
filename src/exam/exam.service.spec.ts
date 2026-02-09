@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { ExamService, ExamResultDto } from './exam.service';
 import { ExamResultsUssdView } from './entities/exam-results-ussd.view';
 
 describe('ExamService', () => {
   let service: ExamService;
-  let examResultsRepository: Repository<ExamResultsUssdView>;
 
   const mockExamResultsRepository = {
     find: jest.fn(),
@@ -24,9 +22,6 @@ describe('ExamService', () => {
     }).compile();
 
     service = module.get<ExamService>(ExamService);
-    examResultsRepository = module.get<Repository<ExamResultsUssdView>>(
-      getRepositoryToken(ExamResultsUssdView),
-    );
   });
 
   it('should be defined', () => {
@@ -55,9 +50,9 @@ describe('ExamService', () => {
       expect(result[0].adm).toBe('12345');
       expect(result[0].studentName).toBe('John Doe');
       expect(result[0].formattedResults).toEqual([
-        { subject: 'ENG', score: 75 },
-        { subject: 'KIS', score: 80 },
-        { subject: 'MAT', score: 85 },
+        { subject: 'ENG', score: 75, grade: 'A-' },
+        { subject: 'KIS', score: 80, grade: 'A' },
+        { subject: 'MAT', score: 85, grade: 'A' },
       ]);
     });
 
@@ -78,10 +73,10 @@ describe('ExamService', () => {
       const result = service.parseResultString(resultString);
 
       expect(result).toEqual([
-        { subject: 'ENG', score: 75 },
-        { subject: 'KIS', score: 80 },
-        { subject: 'MAT', score: 85 },
-        { subject: 'BIO', score: 70 },
+        { subject: 'ENG', score: 75, grade: 'A-' },
+        { subject: 'KIS', score: 80, grade: 'A' },
+        { subject: 'MAT', score: 85, grade: 'A' },
+        { subject: 'BIO', score: 70, grade: 'B+' },
       ]);
     });
 
@@ -113,9 +108,9 @@ describe('ExamService', () => {
           class: 'Form 1',
           datePosted: new Date('2024-01-15'),
           formattedResults: [
-            { subject: 'ENG', score: 75 },
-            { subject: 'KIS', score: 80 },
-            { subject: 'MAT', score: 85 },
+            { subject: 'ENG', score: 75, grade: 'A-' },
+            { subject: 'KIS', score: 80, grade: 'A' },
+            { subject: 'MAT', score: 85, grade: 'A' },
           ],
         },
       ];

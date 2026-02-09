@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import {
   FeeService,
   FeeBalanceDto,
@@ -13,9 +12,6 @@ import { PaymentInstructionsUssdView } from './entities/payment-instructions-uss
 
 describe('FeeService', () => {
   let service: FeeService;
-  let feeBalanceRepository: Repository<FeeBalanceUssdView>;
-  let feeStructureRepository: Repository<FeeStructureUssdView>;
-  let paymentInstructionsRepository: Repository<PaymentInstructionsUssdView>;
 
   const mockFeeBalanceRepository = {
     find: jest.fn(),
@@ -49,15 +45,6 @@ describe('FeeService', () => {
     }).compile();
 
     service = module.get<FeeService>(FeeService);
-    feeBalanceRepository = module.get<Repository<FeeBalanceUssdView>>(
-      getRepositoryToken(FeeBalanceUssdView),
-    );
-    feeStructureRepository = module.get<Repository<FeeStructureUssdView>>(
-      getRepositoryToken(FeeStructureUssdView),
-    );
-    paymentInstructionsRepository = module.get<
-      Repository<PaymentInstructionsUssdView>
-    >(getRepositoryToken(PaymentInstructionsUssdView));
   });
 
   it('should be defined', () => {
@@ -65,7 +52,7 @@ describe('FeeService', () => {
   });
 
   describe('getFeeBalance', () => {
-    it('should return fee balance for a phone number', async () => {
+    it('should return fee balance for a phone number from database', async () => {
       const phoneNumber = '+254712345678';
       const mockFeeBalance = [
         {
@@ -95,8 +82,21 @@ describe('FeeService', () => {
       });
     });
 
-    it('should return empty array when no fee balance found', async () => {
-      const phoneNumber = '+254712345678';
+    it('should return demo data for demo phone numbers', async () => {
+      const phoneNumber = '+254724027217';
+      mockFeeBalanceRepository.find.mockResolvedValue([]);
+
+      const result = await service.getFeeBalance(phoneNumber);
+
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0]).toHaveProperty('adm');
+      expect(result[0]).toHaveProperty('studentName');
+      expect(result[0]).toHaveProperty('feeBalance');
+      expect(result[0]).toHaveProperty('paymentInstructions');
+    });
+
+    it('should return empty array for non-demo phone numbers with no database records', async () => {
+      const phoneNumber = '+254999999999';
       mockFeeBalanceRepository.find.mockResolvedValue([]);
 
       const result = await service.getFeeBalance(phoneNumber);
@@ -106,7 +106,7 @@ describe('FeeService', () => {
   });
 
   describe('getFeeStructure', () => {
-    it('should return fee structure for a phone number and class', async () => {
+    it('should return fee structure for a phone number and class from database', async () => {
       const phoneNumber = '+254712345678';
       const className = 'Form 1';
       const mockFeeStructure = {
@@ -134,19 +134,33 @@ describe('FeeService', () => {
       });
     });
 
-    it('should return null when no fee structure found', async () => {
-      const phoneNumber = '+254712345678';
+    it('should return demo data for demo phone numbers', async () => {
+      const phoneNumber = '+254724027217';
       const className = 'Form 1';
       mockFeeStructureRepository.findOne.mockResolvedValue(null);
 
       const result = await service.getFeeStructure(phoneNumber, className);
 
-      expect(result).toBeNull();
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty('class');
+      expect(result).toHaveProperty('term1');
+      expect(result).toHaveProperty('total');
+    });
+
+    it('should return demo data when no database record found', async () => {
+      const phoneNumber = '+254999999999';
+      const className = 'Form 1';
+      mockFeeStructureRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.getFeeStructure(phoneNumber, className);
+
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty('schoolName');
     });
   });
 
   describe('getPaymentInstructions', () => {
-    it('should return payment instructions for a phone number', async () => {
+    it('should return payment instructions for a phone number from database', async () => {
       const phoneNumber = '+254712345678';
       const mockPaymentInstructions = {
         description: 'Pay via M-Pesa to 123456',
@@ -165,13 +179,25 @@ describe('FeeService', () => {
       });
     });
 
-    it('should return null when no payment instructions found', async () => {
-      const phoneNumber = '+254712345678';
+    it('should return demo data for demo phone numbers', async () => {
+      const phoneNumber = '+254724027217';
       mockPaymentInstructionsRepository.findOne.mockResolvedValue(null);
 
       const result = await service.getPaymentInstructions(phoneNumber);
 
-      expect(result).toBeNull();
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty('description');
+      expect(result).toHaveProperty('schoolName');
+    });
+
+    it('should return demo data when no database record found', async () => {
+      const phoneNumber = '+254999999999';
+      mockPaymentInstructionsRepository.findOne.mockResolvedValue(null);
+
+      const result = await service.getPaymentInstructions(phoneNumber);
+
+      expect(result).not.toBeNull();
+      expect(result).toHaveProperty('schoolName');
     });
   });
 

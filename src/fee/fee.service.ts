@@ -11,6 +11,18 @@ export interface FeeBalanceDto {
   feeBalance: number;
   class: string;
   datePosted: Date;
+  expectedClearanceDate?: Date;
+  paymentInstructions?: {
+    paybill: {
+      businessNumber: string;
+      accountNumber: string;
+    };
+    bank: {
+      name: string;
+      branch: string;
+      accountNumber: string;
+    };
+  };
 }
 
 export interface FeeStructureDto {
@@ -55,24 +67,50 @@ export class FeeService {
         }));
       }
     } catch (error) {
-      console.log('Database error:', error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.log('Database error:', errorMessage);
     }
 
-    // Demo data fallback
+    // Demo data fallback with comprehensive payment details
     const demoData = [
       {
-        adm: 3262,
+        adm: 58641,
         studentName: 'MARTIN WAMALWA',
-        feeBalance: 1200,
-        class: 'FORM1',
-        datePosted: new Date('2019-02-19'),
+        feeBalance: 12500,
+        class: 'FORM 2',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-16'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '5864158641',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
       },
       {
-        adm: 3270,
+        adm: 58642,
         studentName: 'KEVIN OMONDI',
-        feeBalance: 3560,
-        class: 'FORM1',
-        datePosted: new Date('2019-02-19'),
+        feeBalance: 8750,
+        class: 'FORM 3',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-16'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '5864258642',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
       },
     ];
 
@@ -83,6 +121,7 @@ export class FeeService {
       '+254715648891',
       '+254714732457',
       '+254123456789',
+      '+254748944951', // Admin phone
     ];
     if (demoPhones.includes(phoneNumber)) {
       return demoData;
@@ -138,7 +177,9 @@ export class FeeService {
         datePosted: result.datePosted,
       };
     } catch (error) {
-      console.log('Database error, returning demo data:', error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.log('Database error, returning demo data:', errorMessage);
       return demoStructure;
     }
   }
@@ -177,7 +218,9 @@ export class FeeService {
         schoolName: result.schoolName,
       };
     } catch (error) {
-      console.log('Database error, returning demo data:', error.message);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      console.log('Database error, returning demo data:', errorMessage);
       return demoInstructions;
     }
   }
@@ -202,9 +245,6 @@ export class FeeService {
     if (!structure) {
       return 'CON Fee Structure not available at the moment\n0:Back';
     }
-
-    const date = new Date(structure.datePosted);
-    const formattedDate = date.toLocaleDateString('en-GB');
 
     return (
       `CON Fee Structure\n${structure.schoolName}\n` +

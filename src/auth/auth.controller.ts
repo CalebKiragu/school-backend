@@ -21,6 +21,9 @@ export class LoginDto {
   @IsString()
   @IsNotEmpty()
   phoneNumber: string;
+
+  @IsString()
+  admissionNumber?: string;
 }
 
 @ApiTags('authentication')
@@ -29,14 +32,22 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  @ApiOperation({ summary: 'Login with phone number' })
+  @ApiOperation({
+    summary: 'Login with phone number and admission number (2FA)',
+  })
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Login successful' })
-  @ApiResponse({ status: 401, description: 'Phone number not registered' })
+  @ApiResponse({
+    status: 401,
+    description: 'Phone number not registered or invalid admission number',
+  })
   async login(
     @Body() loginDto: LoginDto,
   ): Promise<{ token: string; user: UserInfo }> {
-    return this.authService.login(loginDto.phoneNumber);
+    return this.authService.login(
+      loginDto.phoneNumber,
+      loginDto.admissionNumber,
+    );
   }
 
   @Get('verify')
@@ -45,7 +56,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Verify JWT token' })
   @ApiResponse({ status: 200, description: 'Token is valid' })
   @ApiResponse({ status: 401, description: 'Invalid token' })
-  async verify(@Request() req): Promise<{ valid: boolean; user: any }> {
+  verify(@Request() req: { user: unknown }): { valid: boolean; user: unknown } {
     return {
       valid: true,
       user: req.user,
