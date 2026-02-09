@@ -14,7 +14,7 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { AuthService, UserInfo } from './auth.service';
 
 export class LoginDto {
@@ -23,6 +23,7 @@ export class LoginDto {
   phoneNumber: string;
 
   @IsString()
+  @IsOptional()
   admissionNumber?: string;
 }
 
