@@ -3,12 +3,8 @@ name: Deploy School Backend
 on:
   push:
     branches: [ main, master ]
-    paths:
-      - 'school-backend/**'
   pull_request:
     branches: [ main, master ]
-    paths:
-      - 'school-backend/**'
 
 env:
   AWS_REGION: us-east-1
