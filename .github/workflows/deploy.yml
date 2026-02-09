@@ -16,9 +16,6 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./school-backend
     
     steps:
     - name: Checkout code
@@ -29,7 +26,6 @@ jobs:
       with:
         node-version: '18'
         cache: 'npm'
-        cache-dependency-path: school-backend/package-lock.json
 
     - name: Install dependencies
       run: npm ci
@@ -47,9 +43,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    defaults:
-      run:
-        working-directory: ./school-backend
     
     steps:
     - name: Checkout code
@@ -86,7 +79,7 @@ jobs:
       id: task-def
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: school-backend/ecs-task-definition.json
+        task-definition: ecs-task-definition.json
         container-name: school-backend
         image: ${{ steps.build-image.outputs.image }}
 
