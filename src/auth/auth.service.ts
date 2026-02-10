@@ -58,6 +58,29 @@ export class AuthService {
       };
     }
 
+    // Additional admin users
+    if (normalizedPhone === '+254720613991') {
+      return {
+        phoneNumber: normalizedPhone,
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Didimo Mukahi (Principal)',
+        category: 'Principal',
+        isAdmin: true,
+      };
+    }
+
+    if (normalizedPhone === '+254742218359') {
+      return {
+        phoneNumber: normalizedPhone,
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Wandera Mukahi (Admin)',
+        category: 'Admin',
+        isAdmin: true,
+      };
+    }
+
     // Demo/Test users for development (fallback)
     const demoUsers = [
       {
@@ -100,6 +123,87 @@ export class AuthService {
         name: 'Demo User',
         category: 'Parent',
       },
+      // New students
+      {
+        phoneNumber: '+254701234567',
+        admissionNumber: '12077',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Xavier Kelvin (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254702345678',
+        admissionNumber: '11586',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'David Bwire (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254703456789',
+        admissionNumber: '12047',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Dybal Angoya (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254704567890',
+        admissionNumber: '12668',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Raymond Mandoli (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254705678901',
+        admissionNumber: '11569',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Willingtone Ojambo (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254706789012',
+        admissionNumber: '12643',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Allan Sembu (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254707890123',
+        admissionNumber: '12701',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Deogracious Wando (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254708901234',
+        admissionNumber: '11831',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Aine Wesonga (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254709012345',
+        admissionNumber: '11168',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Vincent Owen (Parent)',
+        category: 'Parent',
+      },
+      {
+        phoneNumber: '+254710123456',
+        admissionNumber: '11789',
+        schoolId: 35609104,
+        schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
+        name: 'Prince Joel (Parent)',
+        category: 'Parent',
+      },
     ];
 
     // Check if it's a demo user
@@ -111,7 +215,7 @@ export class AuthService {
     }
 
     throw new UnauthorizedException(
-      'Phone number not registered. Try demo numbers: +254724027217, +254728986084, +254715648891, +254714732457, or +254123456789. Admin: +254748944951',
+      'Phone number not registered. Try demo numbers: +254724027217, +254728986084, +254715648891, +254714732457, +254123456789, or new students: +254701234567 to +254710123456. Admin: +254748944951, +254720613991, +254742218359',
     );
   }
 
@@ -122,7 +226,12 @@ export class AuthService {
     const normalizedPhone = this.normalizePhoneNumber(phoneNumber);
 
     // Admin login check
-    if (normalizedPhone === '+254748944951' && admissionNumber === '35609104') {
+    if (
+      (normalizedPhone === '+254748944951' ||
+        normalizedPhone === '+254720613991' ||
+        normalizedPhone === '+254742218359') &&
+      admissionNumber === '35609104'
+    ) {
       return true;
     }
 
@@ -133,6 +242,17 @@ export class AuthService {
       { phoneNumber: '+254715648891', admissionNumber: '58643' },
       { phoneNumber: '+254714732457', admissionNumber: '58644' },
       { phoneNumber: '+254123456789', admissionNumber: '58645' },
+      // New students
+      { phoneNumber: '+254701234567', admissionNumber: '12077' },
+      { phoneNumber: '+254702345678', admissionNumber: '11586' },
+      { phoneNumber: '+254703456789', admissionNumber: '12047' },
+      { phoneNumber: '+254704567890', admissionNumber: '12668' },
+      { phoneNumber: '+254705678901', admissionNumber: '11569' },
+      { phoneNumber: '+254706789012', admissionNumber: '12643' },
+      { phoneNumber: '+254707890123', admissionNumber: '12701' },
+      { phoneNumber: '+254708901234', admissionNumber: '11831' },
+      { phoneNumber: '+254709012345', admissionNumber: '11168' },
+      { phoneNumber: '+254710123456', admissionNumber: '11789' },
     ];
 
     const demoUser = demoUsers.find(

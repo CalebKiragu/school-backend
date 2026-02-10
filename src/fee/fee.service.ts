@@ -112,6 +112,196 @@ export class FeeService {
           },
         },
       },
+      {
+        adm: 12077,
+        studentName: 'XAVIER KELVIN',
+        feeBalance: 15200,
+        class: 'FORM 1',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-20'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1207712077',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 11586,
+        studentName: 'DAVID BWIRE',
+        feeBalance: 5400,
+        class: 'FORM 4',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-10'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1158611586',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 12047,
+        studentName: 'DYBAL ANGOYA',
+        feeBalance: 18900,
+        class: 'FORM 2',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-04-05'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1204712047',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 12668,
+        studentName: 'RAYMOND MANDOLI',
+        feeBalance: 22100,
+        class: 'FORM 1',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-04-15'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1266812668',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 11569,
+        studentName: 'WILLINGTONE OJAMBO',
+        feeBalance: 9300,
+        class: 'FORM 3',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-18'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1156911569',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 12643,
+        studentName: 'ALLAN SEMBU',
+        feeBalance: 14600,
+        class: 'FORM 2',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-25'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1264312643',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 12701,
+        studentName: 'DEOGRACIOUS WANDO',
+        feeBalance: 19800,
+        class: 'FORM 1',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-04-08'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1270112701',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 11831,
+        studentName: 'AINE WESONGA',
+        feeBalance: 6700,
+        class: 'FORM 4',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-12'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1183111831',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 11168,
+        studentName: 'VINCENT OWEN',
+        feeBalance: 11400,
+        class: 'FORM 3',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-22'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1116811168',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 11789,
+        studentName: 'PRINCE JOEL',
+        feeBalance: 16500,
+        class: 'FORM 2',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-28'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '1178911789',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
     ];
 
     // Return demo data for demo phone numbers
@@ -122,6 +312,19 @@ export class FeeService {
       '+254714732457',
       '+254123456789',
       '+254748944951', // Admin phone
+      '+254720613991', // Principal
+      '+254742218359', // Admin
+      // New students
+      '+254701234567',
+      '+254702345678',
+      '+254703456789',
+      '+254704567890',
+      '+254705678901',
+      '+254706789012',
+      '+254707890123',
+      '+254708901234',
+      '+254709012345',
+      '+254710123456',
     ];
     if (demoPhones.includes(phoneNumber)) {
       return demoData;
