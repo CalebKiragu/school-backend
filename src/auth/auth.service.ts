@@ -64,7 +64,7 @@ export class AuthService {
         phoneNumber: normalizedPhone,
         schoolId: 35609104,
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
-        name: 'Didimo Mukahi (Principal)',
+        name: 'Didimo Mukati (Principal)',
         category: 'Principal',
         isAdmin: true,
       };
@@ -75,7 +75,7 @@ export class AuthService {
         phoneNumber: normalizedPhone,
         schoolId: 35609104,
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
-        name: 'Wandera Mukahi (Admin)',
+        name: 'Wandera Mofati (Admin)',
         category: 'Admin',
         isAdmin: true,
       };
