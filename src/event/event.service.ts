@@ -122,6 +122,18 @@ export class EventService {
       '+254714732457',
       '+254123456789',
       '+254748944951', // Admin phone
+      '+254720613991', // Admin - Didimo Mukati
+      '+254742218359', // Admin - Wandera Mofati
+      '+254701234567', // Xavier Kelvin
+      '+254702345678', // David Bwire
+      '+254703456789', // Dybal Angoya
+      '+254704567890', // Raymond Mandoli
+      '+254705678901', // Willingtone Ojambo
+      '+254706789012', // Allan Sembu
+      '+254707890123', // Deogracious Wando
+      '+254708901234', // Aine Wesonga
+      '+254709012345', // Vincent Owen
+      '+254710123456', // Prince Joel
     ];
     if (demoPhones.includes(phoneNumber)) {
       return demoData;
