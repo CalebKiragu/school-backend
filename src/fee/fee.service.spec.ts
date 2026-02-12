@@ -215,18 +215,16 @@ describe('FeeService', () => {
 
       const result = service.formatFeeBalanceForUssd(feeBalances);
 
-      expect(result).toContain('CON');
+      expect(result).toContain('END Fee Balance');
       expect(result).toContain('John Doe');
       expect(result).toContain('Ksh.15,000');
-      expect(result).toContain('0:Back');
+      expect(result).toContain('Adm No: 12345');
     });
 
     it('should return not available message for empty fee balance', () => {
       const result = service.formatFeeBalanceForUssd([]);
 
-      expect(result).toBe(
-        'CON Fee Balance not available at the moment\n0:Back',
-      );
+      expect(result).toBe('END Fee Balance not available at the moment.');
     });
   });
 
@@ -244,19 +242,16 @@ describe('FeeService', () => {
 
       const result = service.formatFeeStructureForUssd(feeStructure);
 
-      expect(result).toContain('CON Fee Structure');
+      expect(result).toContain('END Fee Structure');
       expect(result).toContain('Test School');
       expect(result).toContain('Term 1: Ksh.15,000');
       expect(result).toContain('Total: Ksh.45,000');
-      expect(result).toContain('0:Back');
     });
 
     it('should return not available message for null fee structure', () => {
       const result = service.formatFeeStructureForUssd(null);
 
-      expect(result).toBe(
-        'CON Fee Structure not available at the moment\n0:Back',
-      );
+      expect(result).toBe('END Fee Structure not available at the moment.');
     });
   });
 
@@ -270,17 +265,15 @@ describe('FeeService', () => {
       const result =
         service.formatPaymentInstructionsForUssd(paymentInstructions);
 
-      expect(result).toContain('CON Test School');
+      expect(result).toContain('END Payment Instructions');
+      expect(result).toContain('Test School');
       expect(result).toContain('Pay via M-Pesa to 123456');
-      expect(result).toContain('0:Back');
     });
 
     it('should return not available message for null payment instructions', () => {
       const result = service.formatPaymentInstructionsForUssd(null);
 
-      expect(result).toBe(
-        'CON Payment details not available at the moment\n0:Back',
-      );
+      expect(result).toBe('END Payment details not available at the moment.');
     });
   });
 });

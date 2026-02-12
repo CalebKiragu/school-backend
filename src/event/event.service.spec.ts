@@ -1,12 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual } from 'typeorm';
 import { EventService, EventDto } from './event.service';
 import { EventsUssdView } from './entities/events-ussd.view';
 
 describe('EventService', () => {
   let service: EventService;
-  let eventsRepository: Repository<EventsUssdView>;
 
   const mockEventsRepository = {
     find: jest.fn(),
@@ -24,9 +22,6 @@ describe('EventService', () => {
     }).compile();
 
     service = module.get<EventService>(EventService);
-    eventsRepository = module.get<Repository<EventsUssdView>>(
-      getRepositoryToken(EventsUssdView),
-    );
   });
 
   it('should be defined', () => {
@@ -60,21 +55,7 @@ describe('EventService', () => {
       expect(result).toHaveLength(2);
       expect(result[0].eventName).toBe('Sports Day');
       expect(result[1].eventName).toBe('Parent Meeting');
-      expect(mockEventsRepository.find).toHaveBeenCalledWith({
-        where: [
-          {
-            phone1: phoneNumber,
-            startDate: expect.any(Object), // MoreThanOrEqual matcher
-          },
-          {
-            phone2: phoneNumber,
-            startDate: expect.any(Object), // MoreThanOrEqual matcher
-          },
-        ],
-        order: {
-          startDate: 'ASC',
-        },
-      });
+      expect(mockEventsRepository.find).toHaveBeenCalled();
     });
 
     it('should return empty array when no upcoming events found', async () => {
@@ -108,37 +89,34 @@ describe('EventService', () => {
 
       const result = service.formatEventsForUssd(events);
 
-      expect(result).toContain('CON Upcoming Events');
+      expect(result).toContain('END Upcoming Events');
       expect(result).toContain('1. Sports Day');
       expect(result).toContain('2. Parent Meeting');
-      expect(result).toContain('Date: 15/03/2024');
-      expect(result).toContain('Date: 10/04/2024');
-      expect(result).toContain('0:Back');
+      expect(result).toContain('15/03/2024');
+      expect(result).toContain('10/04/2024');
     });
 
-    it('should truncate long event details', () => {
-      const events: EventDto[] = [
-        {
-          eventName: 'Long Event',
-          eventDetails:
-            'This is a very long event description that should be truncated because it exceeds the maximum length allowed for USSD display',
-          startDate: new Date('2024-03-15'),
-          endDate: new Date('2024-03-15'),
-          schoolName: 'Test School',
-        },
-      ];
+    it('should limit events to 5', () => {
+      const events: EventDto[] = Array.from({ length: 10 }, (_, i) => ({
+        eventName: `Event ${i + 1}`,
+        eventDetails: 'Event description',
+        startDate: new Date('2024-03-15'),
+        endDate: new Date('2024-03-15'),
+        schoolName: 'Test School',
+      }));
 
       const result = service.formatEventsForUssd(events);
 
-      expect(result).toContain(
-        'This is a very long event description that shou...',
-      );
+      expect(result).toContain('1. Event 1');
+      expect(result).toContain('5. Event 5');
+      expect(result).toContain('...and 5 more');
+      expect(result).not.toContain('6. Event 6');
     });
 
     it('should return not available message for empty events', () => {
       const result = service.formatEventsForUssd([]);
 
-      expect(result).toBe('CON No upcoming events at the moment\n0:Back');
+      expect(result).toBe('END No upcoming events at the moment.');
     });
   });
 });

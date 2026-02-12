@@ -117,19 +117,16 @@ describe('ExamService', () => {
 
       const result = service.formatResultsForUssd(examResults);
 
-      expect(result).toContain('CON');
+      expect(result).toContain('END Exam Results');
       expect(result).toContain('John Doe');
       expect(result).toContain('End Term 1');
-      expect(result).toContain('ENG:75KIS:80MAT:85');
-      expect(result).toContain('0:Main menu');
+      expect(result).toContain('ENG: 75 (A-)');
     });
 
     it('should return not available message for empty exam results', () => {
       const result = service.formatResultsForUssd([]);
 
-      expect(result).toBe(
-        'CON Exam Results not available at the moment\n0:Back',
-      );
+      expect(result).toBe('END Exam Results not available at the moment.');
     });
   });
 });
