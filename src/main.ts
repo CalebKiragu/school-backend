@@ -5,7 +5,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { Request, Response, NextFunction } from 'express';
+import * as bodyParser from 'body-parser';
 import { AppModule } from './app.module';
 import { loggerConfig } from './common/logger.config';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
@@ -37,14 +37,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Configure form data parsing for USSD webhooks
-  app.use(
-    '/ussd/webhook',
-    (req: Request, res: Response, next: NextFunction) => {
-      req.headers['content-type'] = 'application/json';
-      next();
-    },
-  );
+  // Configure body parser for USSD webhooks (Africa's Talking sends form-urlencoded)
+  app.use('/ussd/webhook', bodyParser.urlencoded({ extended: true }));
+  app.use('/ussd/webhook', bodyParser.json());
 
   // Swagger API documentation
   const config = new DocumentBuilder()

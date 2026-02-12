@@ -108,22 +108,39 @@ export class UssdController {
   })
   async handleUssdWebhook(
     @Body() body: UssdWebhookRequest,
-    @Headers('content-type') contentType: string,
+    @Headers() headers: Record<string, string>,
   ): Promise<string> {
+    const startTime = Date.now();
+    
     try {
-      // Africa's Talking sends data as form-encoded
-      if (contentType?.includes('application/x-www-form-urlencoded')) {
-        return await this.ussdService.handleUssdRequest(body);
+      console.log('USSD Webhook Request:', {
+        body,
+        headers,
+        timestamp: new Date().toISOString()
+      });
+
+      // Validate required fields
+      if (!body.sessionId || !body.phoneNumber) {
+        console.error('Missing required fields:', body);
+        return 'END Invalid request. Missing required fields.';
       }
 
-      // Handle JSON requests as well
-      if (contentType?.includes('application/json')) {
-        return await this.ussdService.handleUssdRequest(body);
+      // Process the USSD request
+      const response = await this.ussdService.handleUssdRequest(body);
+      
+      const duration = Date.now() - startTime;
+      console.log(`USSD Response (${duration}ms):`, response);
+      
+      // Ensure response is within 10 second limit
+      if (duration > 9000) {
+        console.warn(`USSD response took ${duration}ms - approaching timeout!`);
       }
-
-      return 'END Invalid request format';
-    } catch (error) {
-      console.error('USSD webhook error:', error);
+      
+      return response;
+    } catch (error: unknown) {
+      const duration = Date.now() - startTime;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`USSD webhook error (${duration}ms):`, errorMessage);
       return 'END Service temporarily unavailable. Please try again later.';
     }
   }

@@ -27,9 +27,9 @@ export class UssdService {
     private readonly eventService: EventService,
   ) {}
 
-  async registerUssdService(
+  registerUssdService(
     registrationData: UssdRegistrationRequest,
-  ): Promise<any> {
+  ): any {
     const { shortCode, callbackUrl, description } = registrationData;
 
     this.logger.log(
@@ -87,31 +87,50 @@ export class UssdService {
   }
 
   async handleUssdRequest(request: UssdRequest): Promise<string> {
-    const { sessionId, serviceCode, phoneNumber, text } = request;
+    const { sessionId, phoneNumber, text } = request;
 
-    this.logger.log(`USSD Request: ${phoneNumber} - ${text}`);
+    this.logger.log(`USSD Request: ${phoneNumber} - Session: ${sessionId} - Text: "${text}"`);
 
     try {
-      // Validate phone number first
-      const user = await this.authService.validatePhoneNumber(phoneNumber);
-
-      // Get or create session
+      // Get or create session first (fast operation)
       const session = await this.getOrCreateSession(sessionId, phoneNumber);
 
       // Extract user response from text (last part after *)
       const textArray = text.split('*');
       const userResponse = textArray[textArray.length - 1]?.trim() || '';
+      
+      // If text is empty, this is the initial request
+      const isInitialRequest = text === '';
 
-      // Handle menu navigation based on session level
+      this.logger.log(`Session Level: ${session.level}, User Response: "${userResponse}", Initial: ${isInitialRequest}`);
+
+      // For initial request, validate phone and show main menu
+      if (isInitialRequest) {
+        try {
+          const user = await this.authService.validatePhoneNumber(phoneNumber);
+          await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
+          return this.buildMainMenu(user.schoolName);
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          this.logger.error(`Phone validation failed: ${errorMessage}`);
+          return 'END Sorry, phone number is not registered in the system.';
+        }
+      }
+
+      // For subsequent requests, process menu selection
+      // Don't validate phone again - session already exists
+      const schoolName = "SIGALAME BOYS' SENIOR SCHOOL"; // Default school name
       return await this.processMenuSelection(
         session,
         userResponse,
-        user.schoolName,
+        schoolName,
         phoneNumber,
       );
-    } catch (error) {
-      this.logger.error(`USSD Error: ${error.message}`, error.stack);
-      return 'END Sorry, phone number is not registered in the system.';
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`USSD Error: ${errorMessage}`, errorStack);
+      return 'END Service error. Please try again later.';
     }
   }
 
@@ -150,83 +169,74 @@ export class UssdService {
   ): Promise<string> {
     const { sessionId, level } = session;
 
-    // Handle main menu (levels 0 and 1)
-    if (level === UssdLevel.INITIAL || level === UssdLevel.MAIN_MENU) {
+    this.logger.log(`Processing menu: Level=${level}, Response="${userResponse}"`);
+
+    // Handle back navigation
+    if (userResponse === '0') {
+      await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
+      return this.buildMainMenu(schoolName);
+    }
+
+    // Handle main menu selections (level 1)
+    if (level === UssdLevel.MAIN_MENU || level === UssdLevel.INITIAL) {
       switch (userResponse) {
         case '1':
-          if (level === UssdLevel.MAIN_MENU) {
-            try {
-              const feeBalances =
-                await this.feeService.getFeeBalance(phoneNumber);
-              await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
-              return this.feeService.formatFeeBalanceForUssd(feeBalances);
-            } catch (error) {
-              this.logger.error(`Fee Balance Error: ${error.message}`);
-              return 'CON Fee Balance service temporarily unavailable\n0:Back';
-            }
+          // Fee Balance
+          try {
+            const feeBalances = await this.feeService.getFeeBalance(phoneNumber);
+            return this.feeService.formatFeeBalanceForUssd(feeBalances);
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.logger.error(`Fee Balance Error: ${errorMessage}`);
+            return 'END Fee Balance service temporarily unavailable.';
           }
-          break;
+          
         case '2':
-          if (level === UssdLevel.MAIN_MENU) {
-            try {
-              const examResults =
-                await this.examService.getExamResults(phoneNumber);
-              await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
-              return this.examService.formatResultsForUssd(examResults);
-            } catch (error) {
-              this.logger.error(`Exam Results Error: ${error.message}`);
-              return 'CON Exam Results service temporarily unavailable\n0:Back';
-            }
+          // Exam Results
+          try {
+            const examResults = await this.examService.getExamResults(phoneNumber);
+            return this.examService.formatResultsForUssd(examResults);
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.logger.error(`Exam Results Error: ${errorMessage}`);
+            return 'END Exam Results service temporarily unavailable.';
           }
-          break;
+          
         case '3':
-          if (level === UssdLevel.MAIN_MENU) {
-            try {
-              const events =
-                await this.eventService.getUpcomingEvents(phoneNumber);
-              await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
-              return this.eventService.formatEventsForUssd(events);
-            } catch (error) {
-              this.logger.error(`Events Error: ${error.message}`);
-              return 'CON Events service temporarily unavailable\n0:Back';
-            }
+          // Events
+          try {
+            const events = await this.eventService.getUpcomingEvents(phoneNumber);
+            return this.eventService.formatEventsForUssd(events);
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.logger.error(`Events Error: ${errorMessage}`);
+            return 'END Events service temporarily unavailable.';
           }
-          break;
+          
         case '4':
-          if (level === UssdLevel.MAIN_MENU) {
-            await this.updateSessionLevel(
-              sessionId,
-              UssdLevel.FEE_STRUCTURE_MENU,
-            );
-            return this.buildFeeStructureMenu();
-          }
-          break;
+          // Fee Structure Menu
+          await this.updateSessionLevel(sessionId, UssdLevel.FEE_STRUCTURE_MENU);
+          return this.buildFeeStructureMenu();
+          
         case '5':
-          if (level === UssdLevel.MAIN_MENU) {
-            try {
-              const paymentInstructions =
-                await this.feeService.getPaymentInstructions(phoneNumber);
-              await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
-              return this.feeService.formatPaymentInstructionsForUssd(
-                paymentInstructions,
-              );
-            } catch (error) {
-              this.logger.error(`Payment Instructions Error: ${error.message}`);
-              return 'CON Payment Details service temporarily unavailable\n0:Back';
-            }
+          // Payment Instructions
+          try {
+            const paymentInstructions = await this.feeService.getPaymentInstructions(phoneNumber);
+            return this.feeService.formatPaymentInstructionsForUssd(paymentInstructions);
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.logger.error(`Payment Instructions Error: ${errorMessage}`);
+            return 'END Payment Details service temporarily unavailable.';
           }
-          break;
-        case '0':
-          await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
-          return this.buildMainMenu(schoolName);
+          
         default:
-          await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
+          // Invalid selection - show menu again
           return this.buildMainMenu(schoolName);
       }
     }
 
     // Handle fee structure submenu (level 9)
-    if (level === UssdLevel.FEE_STRUCTURE_MENU) {
+    if (level === UssdLevel.FEE_STRUCTURE_MENU || level === 9) {
       switch (userResponse) {
         case '1':
         case '2':
@@ -234,25 +244,22 @@ export class UssdService {
         case '4':
           try {
             const className = `Form ${userResponse}`;
-            const feeStructure = await this.feeService.getFeeStructure(
-              phoneNumber,
-              className,
-            );
+            const feeStructure = await this.feeService.getFeeStructure(phoneNumber, className);
             await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
             return this.feeService.formatFeeStructureForUssd(feeStructure);
-          } catch (error) {
-            this.logger.error(`Fee Structure Error: ${error.message}`);
-            return 'CON Fee Structure service temporarily unavailable\n0:Back';
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            this.logger.error(`Fee Structure Error: ${errorMessage}`);
+            return 'END Fee Structure service temporarily unavailable.';
           }
-        case '0':
-          await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
-          return this.buildMainMenu(schoolName);
+          
         default:
+          // Invalid selection - show fee structure menu again
           return this.buildFeeStructureMenu();
       }
     }
 
-    // Default fallback
+    // Default fallback - show main menu
     await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
     return this.buildMainMenu(schoolName);
   }
