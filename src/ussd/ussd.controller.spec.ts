@@ -31,12 +31,16 @@ describe('UssdController', () => {
   });
 
   describe('handleUssdWebhook', () => {
-    it('should handle USSD request with form-encoded content type', async () => {
+    it('should handle USSD request successfully', async () => {
       const mockRequest = {
         sessionId: 'test-session',
         serviceCode: '*123#',
         phoneNumber: '+254712345678',
         text: '1',
+      };
+
+      const mockHeaders = {
+        'content-type': 'application/x-www-form-urlencoded',
       };
 
       mockUssdService.handleUssdRequest.mockResolvedValue(
@@ -45,7 +49,7 @@ describe('UssdController', () => {
 
       const result = await controller.handleUssdWebhook(
         mockRequest,
-        'application/x-www-form-urlencoded',
+        mockHeaders,
       );
 
       expect(result).toBe('CON Welcome to Test School');
@@ -62,13 +66,17 @@ describe('UssdController', () => {
         text: '1',
       };
 
+      const mockHeaders = {
+        'content-type': 'application/json',
+      };
+
       mockUssdService.handleUssdRequest.mockResolvedValue(
         'CON Welcome to Test School',
       );
 
       const result = await controller.handleUssdWebhook(
         mockRequest,
-        'application/json',
+        mockHeaders,
       );
 
       expect(result).toBe('CON Welcome to Test School');
@@ -77,37 +85,45 @@ describe('UssdController', () => {
       );
     });
 
-    it('should return error for invalid content type', async () => {
+    it('should handle missing sessionId', async () => {
       const mockRequest = {
-        sessionId: 'test-session',
+        sessionId: '',
         serviceCode: '*123#',
         phoneNumber: '+254712345678',
         text: '1',
       };
 
+      const mockHeaders = {
+        'content-type': 'application/x-www-form-urlencoded',
+      };
+
       const result = await controller.handleUssdWebhook(
         mockRequest,
-        'text/plain',
+        mockHeaders,
       );
 
-      expect(result).toBe('END Invalid request format');
+      expect(result).toBe('END Invalid request. Missing required fields.');
       expect(mockUssdService.handleUssdRequest).not.toHaveBeenCalled();
     });
 
-    it('should handle undefined content type', async () => {
+    it('should handle missing phoneNumber', async () => {
       const mockRequest = {
         sessionId: 'test-session',
         serviceCode: '*123#',
-        phoneNumber: '+254712345678',
+        phoneNumber: '',
         text: '1',
+      };
+
+      const mockHeaders = {
+        'content-type': 'application/x-www-form-urlencoded',
       };
 
       const result = await controller.handleUssdWebhook(
         mockRequest,
-        undefined as string,
+        mockHeaders,
       );
 
-      expect(result).toBe('END Invalid request format');
+      expect(result).toBe('END Invalid request. Missing required fields.');
       expect(mockUssdService.handleUssdRequest).not.toHaveBeenCalled();
     });
 
@@ -119,13 +135,17 @@ describe('UssdController', () => {
         text: '1',
       };
 
+      const mockHeaders = {
+        'content-type': 'application/x-www-form-urlencoded',
+      };
+
       mockUssdService.handleUssdRequest.mockRejectedValue(
         new Error('Service error'),
       );
 
       const result = await controller.handleUssdWebhook(
         mockRequest,
-        'application/x-www-form-urlencoded',
+        mockHeaders,
       );
 
       expect(result).toBe(
