@@ -430,14 +430,32 @@ export class FeeService {
 
   formatFeeBalanceForUssd(balances: FeeBalanceDto[]): string {
     if (balances.length === 0) {
-      return 'CON Fee Balance not available at the moment\n0:Back';
+      return 'END Fee Balance not available at the moment.';
     }
 
-    let response = 'CON ';
-    balances.forEach((balance) => {
+    if (balances.length === 1) {
+      // Single student - show detailed info
+      const balance = balances[0];
+      if (!balance) {
+        return 'END Fee Balance not available.';
+      }
       const date = new Date(balance.datePosted);
       const formattedDate = date.toLocaleDateString('en-GB');
-      response += `Fee Balance for ${balance.studentName} as at ${formattedDate} is Ksh.${balance.feeBalance.toLocaleString()}\n`;
+
+      return (
+        `END Fee Balance\n\n` +
+        `Student: ${balance.studentName}\n` +
+        `Adm No: ${balance.adm}\n` +
+        `Class: ${balance.class}\n` +
+        `Balance: Ksh.${balance.feeBalance.toLocaleString()}\n` +
+        `Updated: ${formattedDate}`
+      );
+    }
+
+    // Multiple students - this shouldn't happen after student selection
+    let response = 'CON ';
+    balances.forEach((balance) => {
+      response += `${balance.studentName}: Ksh.${balance.feeBalance.toLocaleString()}\n`;
     });
     response += '0:Back';
 
@@ -446,16 +464,15 @@ export class FeeService {
 
   formatFeeStructureForUssd(structure: FeeStructureDto | null): string {
     if (!structure) {
-      return 'CON Fee Structure not available at the moment\n0:Back';
+      return 'END Fee Structure not available at the moment.';
     }
 
     return (
-      `CON Fee Structure\n${structure.schoolName}\n` +
+      `END Fee Structure\n\n${structure.schoolName}\n${structure.class}\n\n` +
       `Term 1: Ksh.${structure.term1.toLocaleString()}\n` +
       `Term 2: Ksh.${structure.term2.toLocaleString()}\n` +
       `Term 3: Ksh.${structure.term3.toLocaleString()}\n` +
-      `Total: Ksh.${structure.total.toLocaleString()}\n` +
-      '0:Back'
+      `Total: Ksh.${structure.total.toLocaleString()}`
     );
   }
 
@@ -463,9 +480,9 @@ export class FeeService {
     instructions: PaymentInstructionsDto | null,
   ): string {
     if (!instructions) {
-      return 'CON Payment details not available at the moment\n0:Back';
+      return 'END Payment details not available at the moment.';
     }
 
-    return `CON ${instructions.schoolName}\n${instructions.description}\n0:Back`;
+    return `END Payment Instructions\n\n${instructions.schoolName}\n\n${instructions.description}`;
   }
 }

@@ -144,26 +144,29 @@ export class EventService {
 
   formatEventsForUssd(events: EventDto[]): string {
     if (events.length === 0) {
-      return 'CON No upcoming events at the moment\n0:Back';
+      return 'END No upcoming events at the moment.';
     }
 
-    let response = 'CON Upcoming Events\n';
-    events.forEach((event, index) => {
+    // Show only next 5 events to avoid overwhelming the user
+    const eventsToShow = events.slice(0, 5);
+
+    let response = 'END Upcoming Events\n\n';
+    eventsToShow.forEach((event, index) => {
       const startDate = new Date(event.startDate);
       const formattedDate = startDate.toLocaleDateString('en-GB'); // dd/mm/yyyy format
 
-      // Truncate long event details to fit USSD response
-      const truncatedDetails =
-        event.eventDetails.length > 50
-          ? event.eventDetails.substring(0, 47) + '...'
-          : event.eventDetails;
-
       response += `${index + 1}. ${event.eventName}\n`;
-      response += `Date: ${formattedDate}\n`;
-      response += `${truncatedDetails}\n\n`;
+      response += `   ${formattedDate}\n`;
+
+      if (index < eventsToShow.length - 1) {
+        response += '\n';
+      }
     });
 
-    response += '0:Back';
+    if (events.length > 5) {
+      response += `\n...and ${events.length - 5} more`;
+    }
+
     return response;
   }
 }

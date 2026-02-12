@@ -11,7 +11,11 @@ import { EventService } from '../event/event.service';
 export enum UssdLevel {
   INITIAL = 0,
   MAIN_MENU = 1,
+  FEE_BALANCE_STUDENT_SELECT = 2,
+  EXAM_RESULTS_STUDENT_SELECT = 3,
+  EVENTS_MENU = 4,
   FEE_STRUCTURE_MENU = 9,
+  PAYMENT_DETAILS = 10,
 }
 
 @Injectable()
@@ -27,9 +31,7 @@ export class UssdService {
     private readonly eventService: EventService,
   ) {}
 
-  registerUssdService(
-    registrationData: UssdRegistrationRequest,
-  ): any {
+  registerUssdService(registrationData: UssdRegistrationRequest): any {
     const { shortCode, callbackUrl, description } = registrationData;
 
     this.logger.log(
@@ -78,10 +80,10 @@ export class UssdService {
 
       return registrationResult;
     } catch (error) {
-      this.logger.error(
-        `USSD Registration Error: ${error.message}`,
-        error.stack,
-      );
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(`USSD Registration Error: ${errorMessage}`, errorStack);
       throw error;
     }
   }
@@ -89,7 +91,9 @@ export class UssdService {
   async handleUssdRequest(request: UssdRequest): Promise<string> {
     const { sessionId, phoneNumber, text } = request;
 
-    this.logger.log(`USSD Request: ${phoneNumber} - Session: ${sessionId} - Text: "${text}"`);
+    this.logger.log(
+      `USSD Request: ${phoneNumber} - Session: ${sessionId} - Text: "${text}"`,
+    );
 
     try {
       // Get or create session first (fast operation)
@@ -98,11 +102,13 @@ export class UssdService {
       // Extract user response from text (last part after *)
       const textArray = text.split('*');
       const userResponse = textArray[textArray.length - 1]?.trim() || '';
-      
+
       // If text is empty, this is the initial request
       const isInitialRequest = text === '';
 
-      this.logger.log(`Session Level: ${session.level}, User Response: "${userResponse}", Initial: ${isInitialRequest}`);
+      this.logger.log(
+        `Session Level: ${session.level}, User Response: "${userResponse}", Initial: ${isInitialRequest}`,
+      );
 
       // For initial request, validate phone and show main menu
       if (isInitialRequest) {
@@ -110,8 +116,9 @@ export class UssdService {
           const user = await this.authService.validatePhoneNumber(phoneNumber);
           await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
           return this.buildMainMenu(user.schoolName);
-        } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
           this.logger.error(`Phone validation failed: ${errorMessage}`);
           return 'END Sorry, phone number is not registered in the system.';
         }
@@ -127,7 +134,8 @@ export class UssdService {
         phoneNumber,
       );
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       const errorStack = error instanceof Error ? error.stack : undefined;
       this.logger.error(`USSD Error: ${errorMessage}`, errorStack);
       return 'END Service error. Please try again later.';
@@ -169,7 +177,9 @@ export class UssdService {
   ): Promise<string> {
     const { sessionId, level } = session;
 
-    this.logger.log(`Processing menu: Level=${level}, Response="${userResponse}"`);
+    this.logger.log(
+      `Processing menu: Level=${level}, Response="${userResponse}"`,
+    );
 
     // Handle back navigation
     if (userResponse === '0') {
@@ -178,65 +188,177 @@ export class UssdService {
     }
 
     // Handle main menu selections (level 1)
-    if (level === UssdLevel.MAIN_MENU || level === UssdLevel.INITIAL) {
+    if (
+      level === (UssdLevel.MAIN_MENU as number) ||
+      level === (UssdLevel.INITIAL as number)
+    ) {
       switch (userResponse) {
         case '1':
-          // Fee Balance
+          // Fee Balance - Show student selection menu
           try {
-            const feeBalances = await this.feeService.getFeeBalance(phoneNumber);
-            return this.feeService.formatFeeBalanceForUssd(feeBalances);
+            const feeBalances =
+              await this.feeService.getFeeBalance(phoneNumber);
+            if (feeBalances.length === 0) {
+              return 'END Fee Balance not available at the moment.';
+            }
+            if (feeBalances.length === 1) {
+              // Only one student, show directly
+              return this.feeService.formatFeeBalanceForUssd(feeBalances);
+            }
+            // Multiple students, show selection menu
+            await this.updateSessionLevel(
+              sessionId,
+              UssdLevel.FEE_BALANCE_STUDENT_SELECT,
+            );
+            return this.buildStudentSelectionMenu(
+              feeBalances.map((f) => ({
+                adm: f.adm.toString(),
+                name: f.studentName,
+              })),
+              'Select Student for Fee Balance',
+            );
           } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
             this.logger.error(`Fee Balance Error: ${errorMessage}`);
             return 'END Fee Balance service temporarily unavailable.';
           }
-          
+
         case '2':
-          // Exam Results
+          // Exam Results - Show student selection menu
           try {
-            const examResults = await this.examService.getExamResults(phoneNumber);
-            return this.examService.formatResultsForUssd(examResults);
+            const examResults =
+              await this.examService.getExamResults(phoneNumber);
+            if (examResults.length === 0) {
+              return 'END Exam Results not available at the moment.';
+            }
+            if (examResults.length === 1) {
+              // Only one student, show directly
+              return this.examService.formatResultsForUssd(examResults);
+            }
+            // Multiple students, show selection menu
+            await this.updateSessionLevel(
+              sessionId,
+              UssdLevel.EXAM_RESULTS_STUDENT_SELECT,
+            );
+            return this.buildStudentSelectionMenu(
+              examResults.map((e) => ({
+                adm: e.adm,
+                name: e.studentName,
+              })),
+              'Select Student for Exam Results',
+            );
           } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
             this.logger.error(`Exam Results Error: ${errorMessage}`);
             return 'END Exam Results service temporarily unavailable.';
           }
-          
+
         case '3':
-          // Events
+          // Events - Show directly (same for all students)
           try {
-            const events = await this.eventService.getUpcomingEvents(phoneNumber);
+            const events =
+              await this.eventService.getUpcomingEvents(phoneNumber);
             return this.eventService.formatEventsForUssd(events);
           } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
             this.logger.error(`Events Error: ${errorMessage}`);
             return 'END Events service temporarily unavailable.';
           }
-          
+
         case '4':
           // Fee Structure Menu
-          await this.updateSessionLevel(sessionId, UssdLevel.FEE_STRUCTURE_MENU);
+          await this.updateSessionLevel(
+            sessionId,
+            UssdLevel.FEE_STRUCTURE_MENU,
+          );
           return this.buildFeeStructureMenu();
-          
+
         case '5':
-          // Payment Instructions
+          // Payment Instructions - Show directly (same for all)
           try {
-            const paymentInstructions = await this.feeService.getPaymentInstructions(phoneNumber);
-            return this.feeService.formatPaymentInstructionsForUssd(paymentInstructions);
+            const paymentInstructions =
+              await this.feeService.getPaymentInstructions(phoneNumber);
+            return this.feeService.formatPaymentInstructionsForUssd(
+              paymentInstructions,
+            );
           } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
             this.logger.error(`Payment Instructions Error: ${errorMessage}`);
             return 'END Payment Details service temporarily unavailable.';
           }
-          
+
         default:
           // Invalid selection - show menu again
           return this.buildMainMenu(schoolName);
       }
     }
 
+    // Handle fee balance student selection (level 2)
+    if (level === (UssdLevel.FEE_BALANCE_STUDENT_SELECT as number)) {
+      try {
+        const feeBalances = await this.feeService.getFeeBalance(phoneNumber);
+        const selectedIndex = parseInt(userResponse, 10) - 1;
+
+        if (selectedIndex >= 0 && selectedIndex < feeBalances.length) {
+          const selectedBalance = feeBalances[selectedIndex];
+          if (selectedBalance) {
+            await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
+            return this.feeService.formatFeeBalanceForUssd([selectedBalance]);
+          }
+        }
+
+        // Invalid selection
+        return this.buildStudentSelectionMenu(
+          feeBalances.map((f) => ({
+            adm: f.adm.toString(),
+            name: f.studentName,
+          })),
+          'Invalid selection. Select Student',
+        );
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Fee Balance Selection Error: ${errorMessage}`);
+        return 'END Service error. Please try again.';
+      }
+    }
+
+    // Handle exam results student selection (level 3)
+    if (level === (UssdLevel.EXAM_RESULTS_STUDENT_SELECT as number)) {
+      try {
+        const examResults = await this.examService.getExamResults(phoneNumber);
+        const selectedIndex = parseInt(userResponse, 10) - 1;
+
+        if (selectedIndex >= 0 && selectedIndex < examResults.length) {
+          const selectedResult = examResults[selectedIndex];
+          if (selectedResult) {
+            await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
+            return this.examService.formatResultsForUssd([selectedResult]);
+          }
+        }
+
+        // Invalid selection
+        return this.buildStudentSelectionMenu(
+          examResults.map((e) => ({
+            adm: e.adm,
+            name: e.studentName,
+          })),
+          'Invalid selection. Select Student',
+        );
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
+        this.logger.error(`Exam Results Selection Error: ${errorMessage}`);
+        return 'END Service error. Please try again.';
+      }
+    }
+
     // Handle fee structure submenu (level 9)
-    if (level === UssdLevel.FEE_STRUCTURE_MENU || level === 9) {
+    if (level === (UssdLevel.FEE_STRUCTURE_MENU as number)) {
       switch (userResponse) {
         case '1':
         case '2':
@@ -244,15 +366,19 @@ export class UssdService {
         case '4':
           try {
             const className = `Form ${userResponse}`;
-            const feeStructure = await this.feeService.getFeeStructure(phoneNumber, className);
+            const feeStructure = await this.feeService.getFeeStructure(
+              phoneNumber,
+              className,
+            );
             await this.updateSessionLevel(sessionId, UssdLevel.MAIN_MENU);
             return this.feeService.formatFeeStructureForUssd(feeStructure);
           } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            const errorMessage =
+              error instanceof Error ? error.message : 'Unknown error';
             this.logger.error(`Fee Structure Error: ${errorMessage}`);
             return 'END Fee Structure service temporarily unavailable.';
           }
-          
+
         default:
           // Invalid selection - show fee structure menu again
           return this.buildFeeStructureMenu();
@@ -284,5 +410,17 @@ export class UssdService {
       '4. Form 4\n' +
       '0:Back'
     );
+  }
+
+  private buildStudentSelectionMenu(
+    students: Array<{ adm: string; name: string }>,
+    title: string = 'Select Student',
+  ): string {
+    let menu = `CON ${title}\n`;
+    students.forEach((student, index) => {
+      menu += `${index + 1}. ${student.name} (${student.adm})\n`;
+    });
+    menu += '0:Back';
+    return menu;
   }
 }

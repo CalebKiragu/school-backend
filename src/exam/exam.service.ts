@@ -294,16 +294,43 @@ export class ExamService {
 
   formatResultsForUssd(results: ExamResultDto[]): string {
     if (results.length === 0) {
-      return 'CON Exam Results not available at the moment\n0:Back';
+      return 'END Exam Results not available at the moment.';
     }
 
-    let response = 'CON ';
-    results.forEach((result) => {
+    if (results.length === 1) {
+      // Single student - show detailed results
+      const result = results[0];
+      if (!result) {
+        return 'END Exam Results not available.';
+      }
       const date = new Date(result.datePosted);
       const formattedDate = date.toLocaleDateString('en-GB');
-      response += `Results for ${result.studentName} for ${result.examName} as at ${formattedDate}\n\n${result.results}\n\n`;
+
+      // Format subjects with grades
+      let subjectsText = '';
+      result.formattedResults.forEach((subject, index) => {
+        subjectsText += `${subject.subject}: ${subject.score} (${subject.grade})`;
+        if (index < result.formattedResults.length - 1) {
+          subjectsText += '\n';
+        }
+      });
+
+      return (
+        `END Exam Results\n\n` +
+        `Student: ${result.studentName}\n` +
+        `Exam: ${result.examName}\n` +
+        `Class: ${result.class}\n` +
+        `Date: ${formattedDate}\n\n` +
+        `${subjectsText}`
+      );
+    }
+
+    // Multiple students - this shouldn't happen after student selection
+    let response = 'CON ';
+    results.forEach((result) => {
+      response += `${result.studentName} - ${result.examName}\n`;
     });
-    response += '0:Main menu';
+    response += '0:Back';
 
     return response;
   }
