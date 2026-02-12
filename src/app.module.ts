@@ -28,8 +28,10 @@ import { SchoolModule } from './school/school.module';
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_DATABASE'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') === 'development',
+        synchronize: false, // Always false to prevent schema changes
         logging: configService.get('NODE_ENV') === 'development',
+        // Disable automatic snake_case conversion to match PHP schema
+        entitySkipConstructor: true,
       }),
       inject: [ConfigService],
     }),
