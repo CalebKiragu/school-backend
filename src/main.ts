@@ -37,9 +37,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Configure body parser for USSD webhooks (Africa's Talking sends form-urlencoded)
-  app.use('/ussd/webhook', bodyParser.urlencoded({ extended: true }));
-  app.use('/ussd/webhook', bodyParser.json());
+  // Configure body parser for all routes
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
   // Swagger API documentation
   const config = new DocumentBuilder()
