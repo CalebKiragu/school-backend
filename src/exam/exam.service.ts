@@ -52,8 +52,204 @@ export class ExamService {
       console.log('Database error:', errorMessage);
     }
 
-    // Demo data fallback with grades and positioning
-    const demoData = [
+    // Parent-student mapping for demo data
+    const parentStudentMap: Record<string, ExamResultDto[]> = {
+      '+254724027217': [
+        {
+          adm: '58641',
+          studentName: 'MARTIN WAMALWA',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:78KIS:72MAT:85BIO:68PHY:82CHEM:79CRE:75AGR:71',
+          class: 'FORM 2',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:78KIS:72MAT:85BIO:68PHY:82CHEM:79CRE:75AGR:71',
+          ),
+          meanGrade: 'B+',
+          overallPosition: '3',
+          totalStudents: 49,
+        },
+      ],
+      '+254728986084': [
+        {
+          adm: '58642',
+          studentName: 'KEVIN OMONDI',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:82KIS:79MAT:88BIO:85PHY:90CHEM:87GEO:76COMP:84',
+          class: 'FORM 3',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:82KIS:79MAT:88BIO:85PHY:90CHEM:87GEO:76COMP:84',
+          ),
+          meanGrade: 'A-',
+          overallPosition: '2',
+          totalStudents: 52,
+        },
+      ],
+      '+254701234567': [
+        {
+          adm: '12077',
+          studentName: 'XAVIER KELVIN',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:65KIS:70MAT:72BIO:68PHY:75CHEM:71CRE:69AGR:73',
+          class: 'FORM 1',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:65KIS:70MAT:72BIO:68PHY:75CHEM:71CRE:69AGR:73',
+          ),
+          meanGrade: 'B-',
+          overallPosition: '12',
+          totalStudents: 45,
+        },
+      ],
+      '+254702345678': [
+        {
+          adm: '11586',
+          studentName: 'DAVID BWIRE',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:88KIS:85MAT:92BIO:89PHY:91CHEM:90GEO:82COMP:87',
+          class: 'FORM 4',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:88KIS:85MAT:92BIO:89PHY:91CHEM:90GEO:82COMP:87',
+          ),
+          meanGrade: 'A',
+          overallPosition: '1',
+          totalStudents: 48,
+        },
+      ],
+      '+254703456789': [
+        {
+          adm: '12047',
+          studentName: 'DYBAL ANGOYA',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:72KIS:68MAT:75BIO:70PHY:78CHEM:74CRE:71AGR:69',
+          class: 'FORM 2',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:72KIS:68MAT:75BIO:70PHY:78CHEM:74CRE:71AGR:69',
+          ),
+          meanGrade: 'B',
+          overallPosition: '8',
+          totalStudents: 49,
+        },
+      ],
+      '+254704567890': [
+        {
+          adm: '12668',
+          studentName: 'RAYMOND MANDOLI',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:58KIS:62MAT:65BIO:60PHY:68CHEM:63CRE:59AGR:61',
+          class: 'FORM 1',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:58KIS:62MAT:65BIO:60PHY:68CHEM:63CRE:59AGR:61',
+          ),
+          meanGrade: 'C+',
+          overallPosition: '25',
+          totalStudents: 45,
+        },
+      ],
+      '+254705678901': [
+        {
+          adm: '11569',
+          studentName: 'WILLINGTONE OJAMBO',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:80KIS:77MAT:83BIO:79PHY:85CHEM:82GEO:75COMP:81',
+          class: 'FORM 3',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:80KIS:77MAT:83BIO:79PHY:85CHEM:82GEO:75COMP:81',
+          ),
+          meanGrade: 'A-',
+          overallPosition: '4',
+          totalStudents: 52,
+        },
+      ],
+      '+254706789012': [
+        {
+          adm: '12643',
+          studentName: 'ALLAN SEMBU',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:70KIS:73MAT:78BIO:72PHY:76CHEM:75CRE:68AGR:74',
+          class: 'FORM 2',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:70KIS:73MAT:78BIO:72PHY:76CHEM:75CRE:68AGR:74',
+          ),
+          meanGrade: 'B',
+          overallPosition: '10',
+          totalStudents: 49,
+        },
+      ],
+      '+254707890123': [
+        {
+          adm: '12701',
+          studentName: 'DEOGRACIOUS WANDO',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:62KIS:65MAT:68BIO:64PHY:70CHEM:67CRE:63AGR:66',
+          class: 'FORM 1',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:62KIS:65MAT:68BIO:64PHY:70CHEM:67CRE:63AGR:66',
+          ),
+          meanGrade: 'C+',
+          overallPosition: '20',
+          totalStudents: 45,
+        },
+      ],
+      '+254708901234': [
+        {
+          adm: '11831',
+          studentName: 'AINE WESONGA',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:85KIS:82MAT:89BIO:86PHY:88CHEM:87GEO:80COMP:85',
+          class: 'FORM 4',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:85KIS:82MAT:89BIO:86PHY:88CHEM:87GEO:80COMP:85',
+          ),
+          meanGrade: 'A-',
+          overallPosition: '3',
+          totalStudents: 48,
+        },
+      ],
+      '+254709012345': [
+        {
+          adm: '11168',
+          studentName: 'VINCENT OWEN',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:75KIS:78MAT:81BIO:76PHY:80CHEM:79GEO:72COMP:77',
+          class: 'FORM 3',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:75KIS:78MAT:81BIO:76PHY:80CHEM:79GEO:72COMP:77',
+          ),
+          meanGrade: 'B+',
+          overallPosition: '7',
+          totalStudents: 52,
+        },
+      ],
+      '+254710123456': [
+        {
+          adm: '11789',
+          studentName: 'PRINCE JOEL',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:68KIS:71MAT:74BIO:69PHY:73CHEM:72CRE:67AGR:70',
+          class: 'FORM 2',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:68KIS:71MAT:74BIO:69PHY:73CHEM:72CRE:67AGR:70',
+          ),
+          meanGrade: 'B-',
+          overallPosition: '15',
+          totalStudents: 49,
+        },
+      ],
+    };
+
+    // All students data for admin users
+    const allStudentsData = [
       {
         adm: '58641',
         studentName: 'MARTIN WAMALWA',
@@ -224,30 +420,20 @@ export class ExamService {
       },
     ];
 
-    // Return demo data for demo phone numbers
-    const demoPhones = [
-      '+254724027217',
-      '+254728986084',
-      '+254715648891',
-      '+254714732457',
-      '+254123456789',
+    // Admin phones - return all students
+    const adminPhones = [
       '+254748944951', // Admin phone
       '+254720613991', // Principal
       '+254742218359', // Admin
-      // New students
-      '+254701234567',
-      '+254702345678',
-      '+254703456789',
-      '+254704567890',
-      '+254705678901',
-      '+254706789012',
-      '+254707890123',
-      '+254708901234',
-      '+254709012345',
-      '+254710123456',
     ];
-    if (demoPhones.includes(phoneNumber)) {
-      return demoData;
+
+    if (adminPhones.includes(phoneNumber)) {
+      return allStudentsData;
+    }
+
+    // Parent phones - return only their student(s)
+    if (parentStudentMap[phoneNumber]) {
+      return parentStudentMap[phoneNumber];
     }
 
     return [];
