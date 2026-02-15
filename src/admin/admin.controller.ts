@@ -3,6 +3,7 @@ import {
   Post,
   Put,
   Delete,
+  Get,
   Body,
   Param,
   UseGuards,
@@ -44,42 +45,56 @@ export class AdminController {
     return { message: 'Student deleted successfully' };
   }
 
-  // Event endpoints
+  // Event endpoints - Allow string identifiers for demo data
   @Post('events')
   async createEvent(@Body() dto: CreateEventDto) {
     return await this.adminService.createEvent(dto);
   }
 
-  @Put('events/:id')
+  @Put('events/:identifier')
   async updateEvent(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('identifier') identifier: string,
     @Body() dto: UpdateEventDto,
   ) {
+    // Try to parse as number first, otherwise use as string identifier
+    const id = /^\d+$/.test(identifier) ? Number(identifier) : identifier;
     return await this.adminService.updateEvent(id, dto);
   }
 
-  @Delete('events/:id')
-  async deleteEvent(@Param('id', ParseIntPipe) id: number) {
+  @Delete('events/:identifier')
+  async deleteEvent(@Param('identifier') identifier: string) {
+    // Try to parse as number first, otherwise use as string identifier
+    const id = /^\d+$/.test(identifier) ? Number(identifier) : identifier;
     await this.adminService.deleteEvent(id);
     return { message: 'Event deleted successfully' };
   }
 
-  // Exam result endpoints
+  // Test endpoint to debug validation issues
+  @Get('test/:identifier')
+  testEndpoint(@Param('identifier') identifier: string) {
+    return { message: 'Test successful', identifier, type: typeof identifier };
+  }
+
+  // Exam result endpoints - Allow string identifiers for demo data
   @Post('exam-results')
   async createExamResult(@Body() dto: CreateExamResultDto) {
     return await this.adminService.createExamResult(dto);
   }
 
-  @Put('exam-results/:id')
+  @Put('exam-results/:identifier')
   async updateExamResult(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('identifier') identifier: string,
     @Body() dto: UpdateExamResultDto,
   ) {
+    // Try to parse as number first, otherwise use as string identifier
+    const id = /^\d+$/.test(identifier) ? Number(identifier) : identifier;
     return await this.adminService.updateExamResult(id, dto);
   }
 
-  @Delete('exam-results/:id')
-  async deleteExamResult(@Param('id', ParseIntPipe) id: number) {
+  @Delete('exam-results/:identifier')
+  async deleteExamResult(@Param('identifier') identifier: string) {
+    // Try to parse as number first, otherwise use as string identifier
+    const id = /^\d+$/.test(identifier) ? Number(identifier) : identifier;
     await this.adminService.deleteExamResult(id);
     return { message: 'Exam result deleted successfully' };
   }

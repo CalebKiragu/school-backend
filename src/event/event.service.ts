@@ -4,6 +4,7 @@ import { Repository, MoreThanOrEqual } from 'typeorm';
 import { EventsUssdView } from './entities/events-ussd.view';
 
 export interface EventDto {
+  id?: number;
   eventName: string;
   eventDetails: string;
   startDate: Date;
@@ -40,7 +41,8 @@ export class EventService {
       });
 
       if (results.length > 0) {
-        return results.map((result) => ({
+        return results.map((result, index) => ({
+          id: index + 1, // Add sequential IDs for database results
           eventName: result.eventName,
           eventDetails: result.eventDetails,
           startDate: result.startDate,
@@ -57,6 +59,7 @@ export class EventService {
     // Demo data fallback with specific school events
     const demoData = [
       {
+        id: 1,
         eventName: 'Form Four Academic day',
         eventDetails: 'Academic day for Form Four students',
         startDate: new Date('2026-03-01'),
@@ -64,6 +67,7 @@ export class EventService {
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
+        id: 2,
         eventName: 'Form Three Academic day',
         eventDetails: 'Academic day for Form Three students',
         startDate: new Date('2026-03-08'),
@@ -71,6 +75,7 @@ export class EventService {
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
+        id: 3,
         eventName: "Grade Ten parents' orientation",
         eventDetails: 'Orientation session for Grade Ten parents',
         startDate: new Date('2026-03-15'),
@@ -78,6 +83,7 @@ export class EventService {
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
+        id: 4,
         eventName: 'Sending learners home to collect fees',
         eventDetails: 'Students will be sent home to collect outstanding fees',
         startDate: new Date('2026-03-16'),
@@ -85,6 +91,7 @@ export class EventService {
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
+        id: 5,
         eventName: 'Beginning of End of Term I exams',
         eventDetails: 'Start of End of Term I examinations',
         startDate: new Date('2026-03-18'),
@@ -92,6 +99,7 @@ export class EventService {
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
+        id: 6,
         eventName: 'Annual key closure of Term one I',
         eventDetails: 'Official closure of Term One',
         startDate: new Date('2026-04-14'),
@@ -99,6 +107,7 @@ export class EventService {
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
+        id: 7,
         eventName: 'Opening of Term Two II',
         eventDetails: 'Students to resume for Term Two',
         startDate: new Date('2026-04-28'),
@@ -106,6 +115,7 @@ export class EventService {
         schoolName: "SIGALAME BOYS' SENIOR SCHOOL",
       },
       {
+        id: 8,
         eventName: 'Annual general meeting',
         eventDetails: 'Annual general meeting for parents and stakeholders',
         startDate: new Date('2026-05-21'),

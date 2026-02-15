@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ExamResultsUssdView } from './entities/exam-results-ussd.view';
+import { ExamResult } from './entities/exam-result.entity';
 
 export interface ExamResultDto {
+  id?: number;
   adm: string;
   studentName: string;
   examName: string;
@@ -27,6 +29,8 @@ export class ExamService {
   constructor(
     @InjectRepository(ExamResultsUssdView)
     private readonly examResultsRepository: Repository<ExamResultsUssdView>,
+    @InjectRepository(ExamResult)
+    private readonly examResultEntityRepository: Repository<ExamResult>,
   ) {}
 
   async getExamResults(phoneNumber: string): Promise<ExamResultDto[]> {
@@ -36,15 +40,31 @@ export class ExamService {
       });
 
       if (results.length > 0) {
-        return results.map((result) => ({
-          adm: result.adm,
-          studentName: result.studentName,
-          examName: result.examName,
-          results: result.results,
-          class: result.class,
-          datePosted: result.datePosted,
-          formattedResults: this.parseResultString(result.results),
-        }));
+        // Get the IDs from the actual exam_results table
+        const examResultsWithIds = await Promise.all(
+          results.map(async (result) => {
+            const examEntity = await this.examResultEntityRepository.findOne({
+              where: {
+                adm: result.adm,
+                examName: result.examName,
+                schoolId: result.schoolId,
+              },
+            });
+
+            return {
+              id: examEntity?.id,
+              adm: result.adm,
+              studentName: result.studentName,
+              examName: result.examName,
+              results: result.results,
+              class: result.class,
+              datePosted: result.datePosted,
+              formattedResults: this.parseResultString(result.results),
+            };
+          }),
+        );
+
+        return examResultsWithIds;
       }
     } catch (error) {
       const errorMessage =
@@ -56,6 +76,7 @@ export class ExamService {
     const parentStudentMap: Record<string, ExamResultDto[]> = {
       '+254724027217': [
         {
+          id: 1,
           adm: '58641',
           studentName: 'MARTIN WAMALWA',
           examName: 'End of Term 1 Exams',
@@ -72,6 +93,7 @@ export class ExamService {
       ],
       '+254728986084': [
         {
+          id: 2,
           adm: '58642',
           studentName: 'KEVIN OMONDI',
           examName: 'End of Term 1 Exams',
@@ -88,6 +110,7 @@ export class ExamService {
       ],
       '+254701234567': [
         {
+          id: 3,
           adm: '12077',
           studentName: 'XAVIER KELVIN',
           examName: 'End of Term 1 Exams',
@@ -104,6 +127,7 @@ export class ExamService {
       ],
       '+254702345678': [
         {
+          id: 4,
           adm: '11586',
           studentName: 'DAVID BWIRE',
           examName: 'End of Term 1 Exams',
@@ -120,6 +144,7 @@ export class ExamService {
       ],
       '+254703456789': [
         {
+          id: 5,
           adm: '12047',
           studentName: 'DYBAL ANGOYA',
           examName: 'End of Term 1 Exams',
@@ -136,6 +161,7 @@ export class ExamService {
       ],
       '+254704567890': [
         {
+          id: 6,
           adm: '12668',
           studentName: 'RAYMOND MANDOLI',
           examName: 'End of Term 1 Exams',
@@ -152,6 +178,7 @@ export class ExamService {
       ],
       '+254705678901': [
         {
+          id: 7,
           adm: '11569',
           studentName: 'WILLINGTONE OJAMBO',
           examName: 'End of Term 1 Exams',
@@ -168,6 +195,7 @@ export class ExamService {
       ],
       '+254706789012': [
         {
+          id: 8,
           adm: '12643',
           studentName: 'ALLAN SEMBU',
           examName: 'End of Term 1 Exams',
@@ -184,6 +212,7 @@ export class ExamService {
       ],
       '+254707890123': [
         {
+          id: 9,
           adm: '12701',
           studentName: 'DEOGRACIOUS WANDO',
           examName: 'End of Term 1 Exams',
@@ -200,6 +229,7 @@ export class ExamService {
       ],
       '+254708901234': [
         {
+          id: 10,
           adm: '11831',
           studentName: 'AINE WESONGA',
           examName: 'End of Term 1 Exams',
@@ -216,6 +246,7 @@ export class ExamService {
       ],
       '+254709012345': [
         {
+          id: 11,
           adm: '11168',
           studentName: 'VINCENT OWEN',
           examName: 'End of Term 1 Exams',
@@ -232,6 +263,7 @@ export class ExamService {
       ],
       '+254710123456': [
         {
+          id: 12,
           adm: '11789',
           studentName: 'PRINCE JOEL',
           examName: 'End of Term 1 Exams',
@@ -248,6 +280,7 @@ export class ExamService {
       ],
       '+254715648891': [
         {
+          id: 13,
           adm: '58643',
           studentName: 'BRIAN WERE',
           examName: 'End of Term 1 Exams',
@@ -267,6 +300,7 @@ export class ExamService {
     // All students data for admin users
     const allStudentsData = [
       {
+        id: 1,
         adm: '58641',
         studentName: 'MARTIN WAMALWA',
         examName: 'End of Term 1 Exams',
@@ -281,6 +315,7 @@ export class ExamService {
         totalStudents: 49,
       },
       {
+        id: 2,
         adm: '58642',
         studentName: 'KEVIN OMONDI',
         examName: 'End of Term 1 Exams',
@@ -295,6 +330,7 @@ export class ExamService {
         totalStudents: 52,
       },
       {
+        id: 3,
         adm: '12077',
         studentName: 'XAVIER KELVIN',
         examName: 'End of Term 1 Exams',
@@ -309,6 +345,7 @@ export class ExamService {
         totalStudents: 45,
       },
       {
+        id: 4,
         adm: '11586',
         studentName: 'DAVID BWIRE',
         examName: 'End of Term 1 Exams',
@@ -323,6 +360,7 @@ export class ExamService {
         totalStudents: 48,
       },
       {
+        id: 5,
         adm: '12047',
         studentName: 'DYBAL ANGOYA',
         examName: 'End of Term 1 Exams',
@@ -337,6 +375,7 @@ export class ExamService {
         totalStudents: 49,
       },
       {
+        id: 6,
         adm: '12668',
         studentName: 'RAYMOND MANDOLI',
         examName: 'End of Term 1 Exams',
@@ -351,6 +390,7 @@ export class ExamService {
         totalStudents: 45,
       },
       {
+        id: 7,
         adm: '11569',
         studentName: 'WILLINGTONE OJAMBO',
         examName: 'End of Term 1 Exams',
@@ -365,6 +405,7 @@ export class ExamService {
         totalStudents: 52,
       },
       {
+        id: 8,
         adm: '12643',
         studentName: 'ALLAN SEMBU',
         examName: 'End of Term 1 Exams',
@@ -379,6 +420,7 @@ export class ExamService {
         totalStudents: 49,
       },
       {
+        id: 9,
         adm: '12701',
         studentName: 'DEOGRACIOUS WANDO',
         examName: 'End of Term 1 Exams',
@@ -393,6 +435,7 @@ export class ExamService {
         totalStudents: 45,
       },
       {
+        id: 10,
         adm: '11831',
         studentName: 'AINE WESONGA',
         examName: 'End of Term 1 Exams',
@@ -407,6 +450,7 @@ export class ExamService {
         totalStudents: 48,
       },
       {
+        id: 11,
         adm: '11168',
         studentName: 'VINCENT OWEN',
         examName: 'End of Term 1 Exams',
@@ -421,6 +465,7 @@ export class ExamService {
         totalStudents: 52,
       },
       {
+        id: 12,
         adm: '11789',
         studentName: 'PRINCE JOEL',
         examName: 'End of Term 1 Exams',
@@ -435,6 +480,7 @@ export class ExamService {
         totalStudents: 49,
       },
       {
+        id: 13,
         adm: '58643',
         studentName: 'BRIAN WERE',
         examName: 'End of Term 1 Exams',
@@ -452,9 +498,9 @@ export class ExamService {
 
     // Admin phones - return all students
     const adminPhones = [
-      '+254720613991', // Principal
+      '+254720613991', // Principal - Didimo Mukati
       '+254748944951', // Wandera (Admin)
-      '+254742218359', // Admin User
+      '+254742218359', // Admin User - Wandera Mofati
     ];
 
     if (adminPhones.includes(phoneNumber)) {
