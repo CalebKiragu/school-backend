@@ -562,9 +562,9 @@ export class FeeService {
 
     // Admin phones - return all students
     const adminPhones = [
-      '+254748944951', // Admin phone
       '+254720613991', // Principal
-      '+254742218359', // Admin
+      '+254748944951', // Wandera (Admin)
+      '+254742218359', // Admin User
     ];
 
     if (adminPhones.includes(phoneNumber)) {

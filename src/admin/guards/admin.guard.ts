@@ -14,9 +14,9 @@ interface RequestWithUser {
 @Injectable()
 export class AdminGuard implements CanActivate {
   private readonly adminPhones = [
-    '+254748944951', // Admin
     '+254720613991', // Principal
-    '+254742218359', // Admin
+    '+254748944951', // Wandera (Admin)
+    '+254742218359', // Admin User
   ];
 
   canActivate(context: ExecutionContext): boolean {
