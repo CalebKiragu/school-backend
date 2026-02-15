@@ -2,12 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ExamService, ExamResultDto } from './exam.service';
 import { ExamResultsUssdView } from './entities/exam-results-ussd.view';
+import { ExamResult } from './entities/exam-result.entity';
 
 describe('ExamService', () => {
   let service: ExamService;
 
   const mockExamResultsRepository = {
     find: jest.fn(),
+  };
+
+  const mockExamResultEntityRepository = {
+    findOne: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -17,6 +22,10 @@ describe('ExamService', () => {
         {
           provide: getRepositoryToken(ExamResultsUssdView),
           useValue: mockExamResultsRepository,
+        },
+        {
+          provide: getRepositoryToken(ExamResult),
+          useValue: mockExamResultEntityRepository,
         },
       ],
     }).compile();
@@ -39,16 +48,26 @@ describe('ExamService', () => {
           results: 'ENG:75KIS:80MAT:85',
           class: 'Form 1',
           datePosted: new Date('2024-01-15'),
+          schoolId: 12345,
         },
       ];
 
+      const mockExamEntity = {
+        id: 1,
+        adm: '12345',
+        examName: 'End Term 1',
+        schoolId: 12345,
+      };
+
       mockExamResultsRepository.find.mockResolvedValue(mockExamResults);
+      mockExamResultEntityRepository.findOne.mockResolvedValue(mockExamEntity);
 
       const result = await service.getExamResults(phoneNumber);
 
       expect(result).toHaveLength(1);
       expect(result[0].adm).toBe('12345');
       expect(result[0].studentName).toBe('John Doe');
+      expect(result[0].id).toBe(1);
       expect(result[0].formattedResults).toEqual([
         { subject: 'ENG', score: 75, grade: 'A-' },
         { subject: 'KIS', score: 80, grade: 'A' },
