@@ -246,6 +246,22 @@ export class ExamService {
           totalStudents: 49,
         },
       ],
+      '+254715648891': [
+        {
+          adm: '58643',
+          studentName: 'BRIAN WERE',
+          examName: 'End of Term 1 Exams',
+          results: 'ENG:76KIS:74MAT:82BIO:78PHY:85CHEM:80GEO:73COMP:79',
+          class: 'FORM 3',
+          datePosted: new Date('2026-01-15'),
+          formattedResults: this.parseResultString(
+            'ENG:76KIS:74MAT:82BIO:78PHY:85CHEM:80GEO:73COMP:79',
+          ),
+          meanGrade: 'B+',
+          overallPosition: '5',
+          totalStudents: 52,
+        },
+      ],
     };
 
     // All students data for admin users
@@ -417,6 +433,20 @@ export class ExamService {
         meanGrade: 'B-',
         overallPosition: '15',
         totalStudents: 49,
+      },
+      {
+        adm: '58643',
+        studentName: 'BRIAN WERE',
+        examName: 'End of Term 1 Exams',
+        results: 'ENG:76KIS:74MAT:82BIO:78PHY:85CHEM:80GEO:73COMP:79',
+        class: 'FORM 3',
+        datePosted: new Date('2026-01-15'),
+        formattedResults: this.parseResultString(
+          'ENG:76KIS:74MAT:82BIO:78PHY:85CHEM:80GEO:73COMP:79',
+        ),
+        meanGrade: 'B+',
+        overallPosition: '5',
+        totalStudents: 52,
       },
     ];
 

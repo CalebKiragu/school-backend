@@ -326,6 +326,27 @@ export class FeeService {
           },
         },
       ],
+      '+254715648891': [
+        {
+          adm: 58643,
+          studentName: 'BRIAN WERE',
+          feeBalance: 13200,
+          class: 'FORM 3',
+          datePosted: new Date('2026-02-01'),
+          expectedClearanceDate: new Date('2026-03-18'),
+          paymentInstructions: {
+            paybill: {
+              businessNumber: '522123',
+              accountNumber: '5864358643',
+            },
+            bank: {
+              name: 'KCB Bank',
+              branch: 'Port Victoria',
+              accountNumber: '1182255744',
+            },
+          },
+        },
+      ],
     };
 
     // All students data for admin users
@@ -550,6 +571,25 @@ export class FeeService {
           paybill: {
             businessNumber: '522123',
             accountNumber: '1178911789',
+          },
+          bank: {
+            name: 'KCB Bank',
+            branch: 'Port Victoria',
+            accountNumber: '1182255744',
+          },
+        },
+      },
+      {
+        adm: 58643,
+        studentName: 'BRIAN WERE',
+        feeBalance: 13200,
+        class: 'FORM 3',
+        datePosted: new Date('2026-02-01'),
+        expectedClearanceDate: new Date('2026-03-18'),
+        paymentInstructions: {
+          paybill: {
+            businessNumber: '522123',
+            accountNumber: '5864358643',
           },
           bank: {
             name: 'KCB Bank',
