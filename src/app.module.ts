@@ -11,6 +11,7 @@ import { ExamModule } from './exam/exam.module';
 import { EventModule } from './event/event.module';
 import { StudentModule } from './student/student.module';
 import { SchoolModule } from './school/school.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { SchoolModule } from './school/school.module';
     EventModule,
     StudentModule,
     SchoolModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
